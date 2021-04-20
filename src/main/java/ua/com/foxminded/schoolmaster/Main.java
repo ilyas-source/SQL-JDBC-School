@@ -8,7 +8,6 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args) throws SQLException, IOException, URISyntaxException {
-
 	DatabaseConnector databaseConnector = new DatabaseConnector();
 	DatabasePopulator databasePopulator = new DatabasePopulator(databaseConnector);
 

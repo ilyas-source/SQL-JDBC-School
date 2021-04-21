@@ -1,4 +1,4 @@
-package ua.com.foxminded.schoolmaster;
+package ua.com.foxminded.schoolmaster.domain;
 
 public class Student {
 

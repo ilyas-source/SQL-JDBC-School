@@ -11,6 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import ua.com.foxminded.schoolmaster.domain.Course;
+import ua.com.foxminded.schoolmaster.domain.Group;
+import ua.com.foxminded.schoolmaster.domain.Student;
+
 public class DatabaseAccess {
 
     void databaseAccess() {

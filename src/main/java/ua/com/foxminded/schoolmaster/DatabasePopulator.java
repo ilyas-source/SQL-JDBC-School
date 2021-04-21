@@ -16,6 +16,10 @@ import java.util.function.Supplier;
 import static java.util.stream.Collectors.*;
 import java.util.stream.Stream;
 
+import ua.com.foxminded.schoolmaster.domain.Course;
+import ua.com.foxminded.schoolmaster.domain.Group;
+import ua.com.foxminded.schoolmaster.domain.Student;
+
 import static ua.com.foxminded.schoolmaster.NamingGenerator.*;
 import static ua.com.foxminded.schoolmaster.DatabaseAccess.*;
 

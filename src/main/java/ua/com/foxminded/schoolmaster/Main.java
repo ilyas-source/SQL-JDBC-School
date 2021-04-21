@@ -5,6 +5,10 @@ import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.List;
 
+import ua.com.foxminded.schoolmaster.domain.Course;
+import ua.com.foxminded.schoolmaster.domain.Group;
+import ua.com.foxminded.schoolmaster.domain.Student;
+
 public class Main {
 
     public static void main(String[] args) throws SQLException, IOException, URISyntaxException {

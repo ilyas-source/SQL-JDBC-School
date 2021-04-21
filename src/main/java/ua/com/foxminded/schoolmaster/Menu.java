@@ -3,6 +3,9 @@ package ua.com.foxminded.schoolmaster;
 import java.sql.SQLException;
 import java.util.Scanner;
 
+import ua.com.foxminded.schoolmaster.domain.Course;
+import ua.com.foxminded.schoolmaster.domain.Student;
+
 import static ua.com.foxminded.schoolmaster.DatabaseAccess.*;
 
 public class Menu {

@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ua.com.foxminded.schoolmaster.DatabaseConnector;
-import ua.com.foxminded.schoolmaster.domain.Course;
 import ua.com.foxminded.schoolmaster.domain.Group;
 
 public class GroupDAO {

@@ -120,6 +120,7 @@ public class Menu {
 	int studentId = readNextInt();
 
 	Course course = getCourseById(databaseConnector, courseId).get();
+
 	Student student = getStudentById(databaseConnector, studentId).get();
 	addStudentToCourse(databaseConnector, student, course);
 

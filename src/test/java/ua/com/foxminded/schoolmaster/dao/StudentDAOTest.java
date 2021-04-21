@@ -14,33 +14,30 @@ import java.util.List;
 import org.dbunit.IDatabaseTester;
 import org.dbunit.JdbcDatabaseTester;
 import org.dbunit.dataset.IDataSet;
-import org.dbunit.dataset.ITable;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.dbunit.operation.DatabaseOperation;
 import org.h2.tools.RunScript;
-import org.junit.Test;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import ua.com.foxminded.schoolmaster.DatabaseConnector;
-import ua.com.foxminded.schoolmaster.dao.StudentDAO;
 import ua.com.foxminded.schoolmaster.domain.Student;
 
-public class StudentDAOTest {
+class StudentDAOTest {
 
     DatabaseConnector databaseConnector;
     StudentDAO studentDAO;
     private IDatabaseTester databaseTester;
 
     public StudentDAOTest() throws IOException {
-	System.out.println("Constructor called");
 	databaseConnector = new DatabaseConnector("application.properties");
 	studentDAO = new StudentDAO(databaseConnector);
     }
 
     private IDataSet readDataSet() throws Exception {
 	ClassLoader classLoader = getClass().getClassLoader();
-	String file = classLoader.getResource("data.xml").getFile();
+	String file = classLoader.getResource("testdata.xml").getFile();
 	return new FlatXmlDataSetBuilder().build(new FileInputStream(file));
     }
 

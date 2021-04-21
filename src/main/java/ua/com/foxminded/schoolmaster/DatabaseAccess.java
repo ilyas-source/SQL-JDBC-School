@@ -17,9 +17,6 @@ import ua.com.foxminded.schoolmaster.domain.Student;
 
 public class DatabaseAccess {
 
-    void databaseAccess() {
-    }
-
     public static int createGroup(DatabaseConnector databaseConnector, Group group) throws SQLException {
 	try (Connection connection = databaseConnector.getConnection();
 		PreparedStatement statement = connection.prepareStatement(CREATE_GROUP,

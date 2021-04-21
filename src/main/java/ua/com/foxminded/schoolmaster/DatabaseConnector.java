@@ -13,23 +13,22 @@ public class DatabaseConnector {
     private String user;
     private String password;
 
-    public DatabaseConnector() throws IOException {
+    private static final String URL_PROPERTY = "database.url";
+    private static final String USER_PROPERTY = "database.user";
+    private static final String PASSWORD_PROPERTY = "database.password";
+
+    public DatabaseConnector(String propertiesFileName) throws IOException {
 	Properties properties = new Properties();
 	try (InputStream inputStream = Thread.currentThread().getContextClassLoader()
-		.getResourceAsStream("application.properties")) {
+		.getResourceAsStream(propertiesFileName)) {
 	    properties.load(inputStream);
 	}
-	this.url = properties.getProperty("database.url");
-	this.user = properties.getProperty("database.user");
-	this.password = properties.getProperty("database.password");
+	url = properties.getProperty(URL_PROPERTY);
+	user = properties.getProperty(USER_PROPERTY);
+	password = properties.getProperty(PASSWORD_PROPERTY);
     }
 
     public Connection getConnection() throws SQLException {
 	return DriverManager.getConnection(url, user, password);
-    }
-
-    @Override
-    public String toString() {
-	return this.url + ", " + this.user + ":" + this.password;
     }
 }

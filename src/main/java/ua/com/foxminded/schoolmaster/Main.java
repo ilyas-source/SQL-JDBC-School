@@ -12,11 +12,11 @@ import ua.com.foxminded.schoolmaster.domain.Student;
 public class Main {
 
     public static void main(String[] args) throws SQLException, IOException, URISyntaxException {
-	DatabaseConnector databaseConnector = new DatabaseConnector();
+	DatabaseConnector databaseConnector = new DatabaseConnector("application.properties");
 	DatabasePopulator databasePopulator = new DatabasePopulator(databaseConnector);
 
 	System.out.println("Creating tables...");
-	databasePopulator.executeSqlScript("createtables.sql");
+	databasePopulator.executeSqlScript("schema.sql");
 
 	System.out.println("Creating random groups...");
 	List<Group> groups = databasePopulator.createRandomGroups(10);

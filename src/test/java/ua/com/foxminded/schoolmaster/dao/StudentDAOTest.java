@@ -1,4 +1,4 @@
-package ua.com.foxminded.schoolmaster;
+package ua.com.foxminded.schoolmaster.dao;
 
 import static org.junit.Assert.assertEquals;
 
@@ -22,6 +22,7 @@ import org.junit.Test;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
+import ua.com.foxminded.schoolmaster.DatabaseConnector;
 import ua.com.foxminded.schoolmaster.dao.StudentDAO;
 import ua.com.foxminded.schoolmaster.domain.Student;
 
@@ -32,6 +33,7 @@ public class StudentDAOTest {
     private IDatabaseTester databaseTester;
 
     public StudentDAOTest() throws IOException {
+	System.out.println("Constructor called");
 	databaseConnector = new DatabaseConnector("application.properties");
 	studentDAO = new StudentDAO(databaseConnector);
     }
@@ -62,27 +64,12 @@ public class StudentDAOTest {
     @Test
     void givenTables_whenGetAll_thenGetStudentsList() throws SQLException {
 	List<Student> expected = new ArrayList<>();
-	expected.add(new Student(1001, "Peter", "Scholder", 1001));
-	expected.add(new Student(1002, "Edzard", "Kiel", 1002));
-	expected.add(new Student(1003, "Silvana", "Schmitz", 1003));
+	expected.add(new Student(1, "Mya", "Lawson", 1));
+	expected.add(new Student(2, "Joe", "Woods", 2));
+	expected.add(new Student(3, "Ross", "Geller", 3));
 
 	List<Student> actual = studentDAO.getAll();
-	System.out.println(actual);
+
 	assertEquals(expected, actual);
     }
-
-    private Student saveToStudent(String query) throws Exception {
-	ITable itable = databaseTester.getConnection().createQueryTable("students", query);
-	Student student = new Student(Integer
-		.valueOf(itable.getValue(0, "student_id").toString()),
-		itable.getValue(0, "first_name").toString(),
-		itable.getValue(0, "last_name").toString(),
-		null);
-	if (itable.getValue(0, "group_id") != null) {
-	    student.setGroupId(Integer.valueOf(itable.getValue(0, "group_id").toString()));
-	}
-
-	return student;
-    }
-
 }

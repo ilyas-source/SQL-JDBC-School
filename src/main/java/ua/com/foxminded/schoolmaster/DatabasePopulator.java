@@ -16,21 +16,29 @@ import java.util.function.Supplier;
 import static java.util.stream.Collectors.*;
 import java.util.stream.Stream;
 
+import ua.com.foxminded.schoolmaster.dao.CourseDAO;
+import ua.com.foxminded.schoolmaster.dao.GroupDAO;
+import ua.com.foxminded.schoolmaster.dao.StudentDAO;
 import ua.com.foxminded.schoolmaster.domain.Course;
 import ua.com.foxminded.schoolmaster.domain.Group;
 import ua.com.foxminded.schoolmaster.domain.Student;
 
 import static ua.com.foxminded.schoolmaster.NamingGenerator.*;
-import static ua.com.foxminded.schoolmaster.DatabaseAccess.*;
 
 public class DatabasePopulator {
 
     private static final String CR = System.lineSeparator();
     private DatabaseConnector databaseConnector;
     private FileReader fileReader;
+    CourseDAO courseDAO;
+    StudentDAO studentDAO;
+    GroupDAO groupDAO;
 
     public DatabasePopulator(DatabaseConnector databaseConnector) {
 	this.databaseConnector = databaseConnector;
+	this.groupDAO = new GroupDAO(databaseConnector);
+	this.studentDAO = new StudentDAO(databaseConnector);
+	this.courseDAO = new CourseDAO(databaseConnector);
 	fileReader = new FileReader();
     }
 
@@ -48,7 +56,7 @@ public class DatabasePopulator {
 	for (int i = 0; i < quantity; i++) {
 	    Group group = new Group(generateGroupName());
 	    groups.add(group);
-	    int assignedID = createGroup(databaseConnector, group);
+	    int assignedID = this.groupDAO.create(group);
 	    group.setId(assignedID);
 	}
 	return groups;
@@ -60,7 +68,7 @@ public class DatabasePopulator {
 	    String[] courseData = line.split("_");
 	    Course course = new Course(courseData[0], courseData[1]);
 	    courses.add(course);
-	    int assignedID = createCourse(databaseConnector, course);
+	    int assignedID = courseDAO.create(course);
 	    course.setId(assignedID);
 	}
 	return courses;
@@ -81,7 +89,7 @@ public class DatabasePopulator {
 		.limit(quantity)
 		.collect(toList());
 	for (Student student : students) {
-	    int assignedID = createStudent(databaseConnector, student);
+	    int assignedID = studentDAO.create(student);
 	    student.setId(assignedID);
 	}
 	return students;
@@ -98,7 +106,7 @@ public class DatabasePopulator {
 	for (Student student : students) {
 	    Long studentsInGroup = groupsSize.get(student.getGroupId());
 	    if (studentsInGroup >= 10 && studentsInGroup <= 30) {
-		updateStudent(databaseConnector, student);
+		studentDAO.update(student);
 	    } else {
 		student.setGroupId(null);
 	    }
@@ -110,7 +118,7 @@ public class DatabasePopulator {
 	for (Student student : students) {
 	    Collections.shuffle(courses);
 	    for (Course course : courses.subList(0, getRandomNumber(1, quantity))) {
-		addStudentToCourse(databaseConnector, student, course);
+		studentDAO.addToCourse(student, course);
 	    }
 	}
     }

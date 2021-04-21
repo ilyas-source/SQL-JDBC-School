@@ -3,10 +3,11 @@ package ua.com.foxminded.schoolmaster;
 import java.sql.SQLException;
 import java.util.Scanner;
 
+import ua.com.foxminded.schoolmaster.dao.CourseDAO;
+import ua.com.foxminded.schoolmaster.dao.GroupDAO;
+import ua.com.foxminded.schoolmaster.dao.StudentDAO;
 import ua.com.foxminded.schoolmaster.domain.Course;
 import ua.com.foxminded.schoolmaster.domain.Student;
-
-import static ua.com.foxminded.schoolmaster.DatabaseAccess.*;
 
 public class Menu {
 
@@ -22,9 +23,15 @@ public class Menu {
 
     DatabaseConnector databaseConnector;
     Scanner scanner;
+    CourseDAO courseDAO;
+    StudentDAO studentDAO;
+    GroupDAO groupDAO;
 
     public Menu(DatabaseConnector сonnection) {
 	this.databaseConnector = сonnection;
+	this.groupDAO = new GroupDAO(databaseConnector);
+	this.studentDAO = new StudentDAO(databaseConnector);
+	this.courseDAO = new CourseDAO(databaseConnector);
 	scanner = new Scanner(System.in);
     }
 
@@ -64,7 +71,7 @@ public class Menu {
 	System.out.println(CR + "How many students:");
 	int studentCount = readNextInt();
 	System.out.println("Groups with less or equal students:");
-	getGroupsByLessThanCount(databaseConnector, studentCount)
+	groupDAO.getByLessThanCount(studentCount)
 		.stream()
 		.forEach(System.out::println);
 	start();
@@ -72,13 +79,13 @@ public class Menu {
 
     private void printStudentsByCourse() throws SQLException {
 	System.out.println(CR + "Enter one of the course names:");
-	getCourses(databaseConnector)
+	courseDAO.getAll()
 		.stream()
 		.forEach(System.out::println);
 	scanner.nextLine();
 	String courseName = scanner.nextLine();
 
-	getStudentsByCourse(databaseConnector, courseName)
+	studentDAO.getByCourse(courseName)
 		.stream()
 		.forEach(System.out::println);
 	start();
@@ -90,9 +97,7 @@ public class Menu {
 	String firstName = scanner.nextLine();
 	System.out.println("Last name: ");
 	String lastName = scanner.nextLine();
-
-	createStudent(databaseConnector, new Student(firstName, lastName));
-
+	studentDAO.create(new Student(firstName, lastName));
 	System.out.println("Student created." + CR);
 	start();
     }
@@ -100,11 +105,10 @@ public class Menu {
     private void callStudentDeletion() throws SQLException {
 	System.out.println(CR + "Student ID for deletion or 0 to cancel: ");
 	int studentId = readNextInt();
-
 	if (studentId != 0) {
-	    if (getStudentById(databaseConnector, studentId).isPresent()) {
-		Student student = getStudentById(databaseConnector, studentId).get();
-		deleteStudent(databaseConnector, student);
+	    if (studentDAO.getById(studentId).isPresent()) {
+		Student student = studentDAO.getById(studentId).get();
+		studentDAO.delete(student);
 		System.out.println("Student was deleted!" + CR);
 	    }
 	    start();
@@ -113,38 +117,34 @@ public class Menu {
 
     private void callAddStudentToCourse() throws SQLException {
 	System.out.println(CR + "Select course ID:");
-	getCourses(databaseConnector)
+	courseDAO.getAll()
 		.stream()
 		.forEach(System.out::println);
 	int courseId = readNextInt();
 
 	System.out.println("Select student ID:");
-	getStudents(databaseConnector).stream().forEach(System.out::println);
+	studentDAO.getAll().stream().forEach(System.out::println);
 	int studentId = readNextInt();
-
-	Course course = getCourseById(databaseConnector, courseId).get();
-
-	Student student = getStudentById(databaseConnector, studentId).get();
-	addStudentToCourse(databaseConnector, student, course);
-
+	Course course = courseDAO.getById(courseId).get();
+	Student student = studentDAO.getById(studentId).get();
+	studentDAO.addToCourse(student, course);
 	System.out.println("Student (ID=" + studentId + ") was added to course #" + courseId + CR);
 	start();
     }
 
     private void callRemoveStudentFromCourse() throws SQLException {
 	System.out.println(CR + "Choose student ID:");
-	getStudents(databaseConnector).stream().forEach(System.out::println);
+	studentDAO.getAll().stream().forEach(System.out::println);
 	int studentId = readNextInt();
-	Student student = getStudentById(databaseConnector, studentId).get();
-
+	Student student = studentDAO.getById(studentId).get();
 	System.out.println("Course ID to remove:");
-	getCoursesByStudent(databaseConnector, studentId)
+	courseDAO.getByStudent(studentId)
 		.stream()
 		.forEach(System.out::println);
 	int courseId = readNextInt();
-	Course course = getCourseById(databaseConnector, courseId).get();
+	Course course = courseDAO.getById(courseId).get();
 
-	removeStudentFromCourse(databaseConnector, student, course);
+	studentDAO.removeFromCourse(student, course);
 	System.out.println("Student (ID=" + studentId + ") was removed from course #" + courseId + CR);
 	start();
     }

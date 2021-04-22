@@ -62,7 +62,9 @@ class GroupDAOTest {
 	expected.add(new Group(3, "ZX-03"));
 	expected.add(new Group(4, "ER-04"));
 
-	assertEquals(expected, groupDAO.getAll());
+	List<Group> actual = groupDAO.getAll();
+
+	assertEquals(expected, actual);
     }
 
     @Test
@@ -89,7 +91,9 @@ class GroupDAOTest {
 	expected.add(new Group(2, "AS-02"));
 	expected.add(new Group(3, "ZX-03"));
 
-	assertEquals(expected, groupDAO.getByLessThanCount(1));
+	List<Group> actual = groupDAO.getByLessThanCount(1);
+
+	assertEquals(expected, actual);
     }
 
     private Group mapToGroup(String query) throws Exception {

@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ua.com.foxminded.schoolmaster.DatabaseConnector;
+import ua.com.foxminded.schoolmaster.domain.Course;
 import ua.com.foxminded.schoolmaster.domain.Group;
 
 public class GroupDAO {
@@ -42,7 +43,7 @@ public class GroupDAO {
 	    statement.setInt(1, studentCount);
 	    try (ResultSet resultSet = statement.executeQuery();) {
 		while (resultSet.next()) {
-		    groups.add(new Group(resultSet.getInt("group_id"), resultSet.getString("group_name")));
+		    groups.add(extractGroupFromResultSet(resultSet));
 		}
 	    }
 	}
@@ -55,10 +56,14 @@ public class GroupDAO {
 		PreparedStatement statement = connection.prepareStatement(GET_GROUPS)) {
 	    try (ResultSet resultSet = statement.executeQuery();) {
 		while (resultSet.next()) {
-		    groups.add(new Group(resultSet.getInt("group_id"), resultSet.getString("group_name")));
+		    groups.add(extractGroupFromResultSet(resultSet));
 		}
 	    }
 	}
 	return groups;
+    }
+
+    private Group extractGroupFromResultSet(ResultSet resultSet) throws SQLException {
+	return new Group(resultSet.getInt("group_id"), resultSet.getString("group_name"));
     }
 }

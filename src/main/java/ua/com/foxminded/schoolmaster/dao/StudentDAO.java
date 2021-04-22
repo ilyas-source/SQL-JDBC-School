@@ -13,6 +13,7 @@ import java.util.Optional;
 
 import ua.com.foxminded.schoolmaster.DatabaseConnector;
 import ua.com.foxminded.schoolmaster.domain.Course;
+import ua.com.foxminded.schoolmaster.domain.Group;
 import ua.com.foxminded.schoolmaster.domain.Student;
 
 public class StudentDAO {
@@ -66,10 +67,7 @@ public class StudentDAO {
 		PreparedStatement statement = connection.prepareStatement(GET_STUDENTS);
 		ResultSet resultSet = statement.executeQuery();) {
 	    while (resultSet.next()) {
-		Student student = new Student(resultSet.getInt("student_id"),
-			resultSet.getString("first_name"),
-			resultSet.getString("last_name"),
-			resultSet.getInt("group_id"));
+		Student student = extractStudentFromResultSet(resultSet);
 		students.add(student);
 	    }
 	}
@@ -84,10 +82,7 @@ public class StudentDAO {
 	    prepStatement.setString(1, courseName);
 	    try (ResultSet resultSet = prepStatement.executeQuery();) {
 		while (resultSet.next()) {
-		    Student student = new Student(resultSet.getInt("student_id"),
-			    resultSet.getString("first_name"),
-			    resultSet.getString("last_name"),
-			    resultSet.getInt("group_id"));
+		    Student student = extractStudentFromResultSet(resultSet);
 		    students.add(student);
 		}
 	    }
@@ -101,10 +96,7 @@ public class StudentDAO {
 	    statement.setInt(1, studentId);
 	    try (ResultSet resultSet = statement.executeQuery();) {
 		if (resultSet.next()) {
-		    return Optional.of(new Student(resultSet.getInt("student_id"),
-			    resultSet.getString("first_name"),
-			    resultSet.getString("last_name"),
-			    resultSet.getInt("group_id")));
+		    return Optional.of(extractStudentFromResultSet(resultSet));
 		}
 	    }
 	}
@@ -131,4 +123,12 @@ public class StudentDAO {
 	    statement.executeUpdate();
 	}
     }
+
+    private Student extractStudentFromResultSet(ResultSet resultSet) throws SQLException {
+	return new Student(resultSet.getInt("student_id"),
+		resultSet.getString("first_name"),
+		resultSet.getString("last_name"),
+		resultSet.getInt("group_id"));
+    }
+
 }

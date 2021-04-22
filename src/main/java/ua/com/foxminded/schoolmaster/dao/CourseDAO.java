@@ -41,9 +41,7 @@ public class CourseDAO {
 		PreparedStatement statement = connection.prepareStatement(GET_COURSES);
 		ResultSet resultSet = statement.executeQuery();) {
 	    while (resultSet.next()) {
-		Course course = new Course(resultSet.getInt("course_id"),
-			resultSet.getString("course_name"),
-			resultSet.getString("course_description"));
+		Course course = extractCourseFromResultSet(resultSet);
 		courses.add(course);
 	    }
 	}
@@ -56,9 +54,7 @@ public class CourseDAO {
 	    statement.setInt(1, courseId);
 	    try (ResultSet resultSet = statement.executeQuery();) {
 		if (resultSet.next()) {
-		    return Optional.of(new Course(resultSet.getInt("course_id"),
-			    resultSet.getString("course_name"),
-			    resultSet.getString("course_description")));
+		    return Optional.of(extractCourseFromResultSet(resultSet));
 		}
 	    }
 	}
@@ -72,14 +68,18 @@ public class CourseDAO {
 	    statement.setInt(1, studentId);
 	    try (ResultSet resultSet = statement.executeQuery();) {
 		while (resultSet.next()) {
-		    Course course = new Course(resultSet.getInt("course_id"),
-			    resultSet.getString("course_name"),
-			    resultSet.getString("course_description"));
+		    Course course = extractCourseFromResultSet(resultSet);
 		    courses.add(course);
 		}
 	    }
 	}
 	return courses;
+    }
+
+    private Course extractCourseFromResultSet(ResultSet resultSet) throws SQLException {
+	return new Course(resultSet.getInt("course_id"),
+		resultSet.getString("course_name"),
+		resultSet.getString("course_description"));
     }
 
 }

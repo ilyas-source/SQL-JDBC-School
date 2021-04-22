@@ -1,6 +1,6 @@
 package ua.com.foxminded.schoolmaster.dao;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
@@ -25,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import ua.com.foxminded.schoolmaster.DatabaseConnector;
+import ua.com.foxminded.schoolmaster.domain.Course;
 import ua.com.foxminded.schoolmaster.domain.Student;
 
 class StudentDAOTest {
@@ -53,7 +54,7 @@ class StudentDAOTest {
     }
 
     @BeforeEach
-    void init() throws Exception {
+    void fillTables() throws Exception {
 	String jdbcUrl = databaseConnector.getConnection().getMetaData().getURL();
 	databaseTester = new JdbcDatabaseTester(org.h2.Driver.class.getName(), jdbcUrl);
 	databaseTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
@@ -87,7 +88,7 @@ class StudentDAOTest {
 	Student expected = new Student(1, "John", "Doe", 2);
 	studentDAO.update(expected);
 
-	Student actual = mapToStudent(
+	Student actual = extractStudentFromQuery(
 		"select student_id, group_id, first_name, last_name from students where (student_id = 1);");
 
 	assertEquals(expected, actual);
@@ -106,7 +107,7 @@ class StudentDAOTest {
 	Student expected = new Student(4, "New", "Student", 1);
 	studentDAO.create(expected);
 
-	Student actual = mapToStudent(
+	Student actual = extractStudentFromQuery(
 		"select student_id, group_id, first_name, last_name from students where (first_name = 'New');");
 	expected.setId(actual.getId());
 
@@ -124,7 +125,7 @@ class StudentDAOTest {
     }
 
     @Test
-    void givenDelete_whenDelete_thenCascadeDeletedFromCourse() throws DataSetException, Exception {
+    void givenStudent_whenDelete_thenCascadeDeletedFromCourse() throws DataSetException, Exception {
 	studentDAO.delete(new Student(1, "Mya", "Lawson", 1));
 	int expected = 4;
 
@@ -135,7 +136,7 @@ class StudentDAOTest {
     }
 
     @Test
-    void givenCourseName_whenGetByCourseName_thenGet2Students() throws SQLException {
+    void givenCourseName_whenGetByCourseName_thenGetStudentsList() throws SQLException {
 	List<Student> expected = new ArrayList<>();
 	expected.add(new Student(1, "Mya", "Lawson", 1));
 	expected.add(new Student(2, "Joe", "Woods", 2));
@@ -145,7 +146,31 @@ class StudentDAOTest {
 	assertEquals(expected, actual);
     }
 
-    private Student mapToStudent(String query) throws Exception {
+    @Test
+    void givenStudent_whenAddToCourse_then1StudentInCourse() throws DataSetException, Exception {
+	studentDAO.addToCourse(new Student(1, "Monica", "Geller", 1),
+		new Course(3, "Music", "Explore music"));
+
+	int actual = databaseTester.getConnection().createQueryTable("students_courses",
+		"select * from students_courses where (student_id = 1) and (course_id = 3)")
+		.getRowCount();
+
+	assertEquals(1, actual);
+    }
+
+    @Test
+    void givenStudent_whenRemoveFromCourse_thenNoStudentsInCourse() throws DataSetException, Exception {
+	studentDAO.removeFromCourse(new Student(1, "Mya", "Lawson", 1), new Course(1, "Math", "Learn math"));
+
+	int actual = databaseTester.getConnection()
+		.createQueryTable("students_courses",
+			"select * from students_courses where (student_id = 1) and (course_id = 1)")
+		.getRowCount();
+
+	assertEquals(0, actual);
+    }
+
+    private Student extractStudentFromQuery(String query) throws Exception {
 	ITable itable = databaseTester.getConnection().createQueryTable("students", query);
 	Student student = new Student(Integer.valueOf(itable.getValue(0, "student_id").toString()),
 		itable.getValue(0, "first_name").toString(),

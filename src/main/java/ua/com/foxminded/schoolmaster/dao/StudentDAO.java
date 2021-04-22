@@ -76,7 +76,7 @@ public class StudentDAO {
 	return students;
     }
 
-    public List<Student> getByCourse(String courseName) throws SQLException {
+    public List<Student> getByCourseName(String courseName) throws SQLException {
 	List<Student> students = new ArrayList<>();
 
 	try (Connection connection = databaseConnector.getConnection();

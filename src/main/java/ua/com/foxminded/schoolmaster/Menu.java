@@ -85,7 +85,7 @@ public class Menu {
 	scanner.nextLine();
 	String courseName = scanner.nextLine();
 
-	studentDAO.getByCourse(courseName)
+	studentDAO.getByCourseName(courseName)
 		.stream()
 		.forEach(System.out::println);
 	start();

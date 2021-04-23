@@ -28,22 +28,22 @@ import static ua.com.foxminded.schoolmaster.NamingGenerator.*;
 public class DatabasePopulator {
 
     private static final String CR = System.lineSeparator();
-    private DatabaseConnector databaseConnector;
+    private ConnectionProvider connectionProvider;
     private FileReader fileReader;
     CourseDAO courseDAO;
     StudentDAO studentDAO;
     GroupDAO groupDAO;
 
-    public DatabasePopulator(DatabaseConnector databaseConnector) {
-	this.databaseConnector = databaseConnector;
-	this.groupDAO = new GroupDAO(databaseConnector);
-	this.studentDAO = new StudentDAO(databaseConnector);
-	this.courseDAO = new CourseDAO(databaseConnector);
+    public DatabasePopulator(ConnectionProvider connectionProvider) {
+	this.connectionProvider = connectionProvider;
+	this.groupDAO = new GroupDAO(connectionProvider);
+	this.studentDAO = new StudentDAO(connectionProvider);
+	this.courseDAO = new CourseDAO(connectionProvider);
 	fileReader = new FileReader();
     }
 
     public void executeSqlScript(String fileName) throws SQLException, URISyntaxException {
-	try (Connection connection = databaseConnector.getConnection();
+	try (Connection connection = connectionProvider.getConnection();
 		PreparedStatement statement = connection.prepareStatement(getFileLines(fileName));) {
 	    statement.execute();
 	} catch (SQLException | IOException e) {
@@ -56,8 +56,7 @@ public class DatabasePopulator {
 	for (int i = 0; i < quantity; i++) {
 	    Group group = new Group(generateGroupName());
 	    groups.add(group);
-	    int assignedID = this.groupDAO.create(group);
-	    group.setId(assignedID);
+	    this.groupDAO.create(group);
 	}
 	return groups;
     }
@@ -68,13 +67,13 @@ public class DatabasePopulator {
 	    String[] courseData = line.split("_");
 	    Course course = new Course(courseData[0], courseData[1]);
 	    courses.add(course);
-	    int assignedID = courseDAO.create(course);
-	    course.setId(assignedID);
+	    courseDAO.create(course);
 	}
 	return courses;
     }
 
     public List<Student> generateRandomStudents(int quantity) throws SQLException {
+
 	Supplier<Student> randomStudent = () -> {
 	    try {
 		return new Student(
@@ -89,8 +88,7 @@ public class DatabasePopulator {
 		.limit(quantity)
 		.collect(toList());
 	for (Student student : students) {
-	    int assignedID = studentDAO.create(student);
-	    student.setId(assignedID);
+	    studentDAO.create(student);
 	}
 	return students;
     }

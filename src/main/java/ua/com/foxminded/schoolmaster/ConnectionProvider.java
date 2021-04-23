@@ -7,17 +7,17 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-public class DatabaseConnector {
-
-    private String url;
-    private String user;
-    private String password;
+public class ConnectionProvider {
 
     private static final String URL_PROPERTY = "database.url";
     private static final String USER_PROPERTY = "database.user";
     private static final String PASSWORD_PROPERTY = "database.password";
 
-    public DatabaseConnector(String propertiesFileName) throws IOException {
+    private String url;
+    private String user;
+    private String password;
+
+    public ConnectionProvider(String propertiesFileName) throws IOException {
 	Properties properties = new Properties();
 	try (InputStream inputStream = Thread.currentThread().getContextClassLoader()
 		.getResourceAsStream(propertiesFileName)) {

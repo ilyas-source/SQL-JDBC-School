@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import ua.com.foxminded.schoolmaster.DatabaseConnector;
+import ua.com.foxminded.schoolmaster.ConnectionProvider;
 import ua.com.foxminded.schoolmaster.domain.Course;
 import ua.com.foxminded.schoolmaster.domain.Student;
 
@@ -25,14 +25,14 @@ public class StudentDAO {
     private static final String GET_STUDENTS_BY_COURSE = "SELECT s.student_id, s.group_id, s.first_name, s.last_name"
 	    + " FROM students s left outer join students_courses sc on s.student_id = sc.student_id"
 	    + " left outer join courses c on sc.course_id = c.course_id where c.course_name = ?;";
-    private DatabaseConnector databaseConnector;
+    private ConnectionProvider connectionProvider;
 
-    public StudentDAO(DatabaseConnector databaseConnection) {
-	databaseConnector = databaseConnection;
+    public StudentDAO(ConnectionProvider databaseConnection) {
+	connectionProvider = databaseConnection;
     }
 
-    public int create(Student student) throws SQLException {
-	try (Connection connection = databaseConnector.getConnection();
+    public void create(Student student) throws SQLException {
+	try (Connection connection = connectionProvider.getConnection();
 		PreparedStatement statement = connection.prepareStatement(CREATE_STUDENT,
 			Statement.RETURN_GENERATED_KEYS);) {
 	    statement.setObject(1, student.getGroupId());
@@ -41,13 +41,13 @@ public class StudentDAO {
 	    statement.executeUpdate();
 	    try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
 		generatedKeys.next();
-		return generatedKeys.getInt(1);
+		student.setId(generatedKeys.getInt(1));
 	    }
 	}
     }
 
     public void update(Student student) throws SQLException {
-	try (Connection connection = databaseConnector.getConnection();
+	try (Connection connection = connectionProvider.getConnection();
 		PreparedStatement statement = connection.prepareStatement(UPDATE_STUDENT);) {
 	    statement.setString(1, student.getFirstName());
 	    statement.setString(2, student.getLastName());
@@ -59,7 +59,7 @@ public class StudentDAO {
 
     public void addToCourse(Student student, Course course)
 	    throws SQLException {
-	try (Connection connection = databaseConnector.getConnection();
+	try (Connection connection = connectionProvider.getConnection();
 		PreparedStatement statement = connection.prepareStatement(ADD_STUDENT_TO_COURSE);) {
 	    statement.setInt(1, student.getId());
 	    statement.setInt(2, course.getId());
@@ -70,7 +70,7 @@ public class StudentDAO {
     public List<Student> getAll() throws SQLException {
 	List<Student> students = new ArrayList<>();
 
-	try (Connection connection = databaseConnector.getConnection();
+	try (Connection connection = connectionProvider.getConnection();
 		PreparedStatement statement = connection.prepareStatement(GET_STUDENTS);
 		ResultSet resultSet = statement.executeQuery();) {
 	    while (resultSet.next()) {
@@ -84,7 +84,7 @@ public class StudentDAO {
     public List<Student> getByCourseName(String courseName) throws SQLException {
 	List<Student> students = new ArrayList<>();
 
-	try (Connection connection = databaseConnector.getConnection();
+	try (Connection connection = connectionProvider.getConnection();
 		PreparedStatement prepStatement = connection.prepareStatement(GET_STUDENTS_BY_COURSE);) {
 	    prepStatement.setString(1, courseName);
 	    try (ResultSet resultSet = prepStatement.executeQuery();) {
@@ -98,7 +98,7 @@ public class StudentDAO {
     }
 
     public Optional<Student> getById(int studentId) throws SQLException {
-	try (Connection connection = databaseConnector.getConnection();
+	try (Connection connection = connectionProvider.getConnection();
 		PreparedStatement statement = connection.prepareStatement(GET_STUDENT_BY_ID);) {
 	    statement.setInt(1, studentId);
 	    try (ResultSet resultSet = statement.executeQuery();) {
@@ -111,7 +111,7 @@ public class StudentDAO {
     }
 
     public void delete(Student student) throws SQLException {
-	try (Connection connection = databaseConnector.getConnection();
+	try (Connection connection = connectionProvider.getConnection();
 		PreparedStatement statement = connection.prepareStatement(DELETE_STUDENT);) {
 	    statement.setInt(1, student.getId());
 	    int rowsAffected = statement.executeUpdate();
@@ -123,7 +123,7 @@ public class StudentDAO {
 
     public void removeFromCourse(Student student, Course course)
 	    throws SQLException {
-	try (Connection connection = databaseConnector.getConnection();
+	try (Connection connection = connectionProvider.getConnection();
 		PreparedStatement statement = connection.prepareStatement(DELETE_STUDENT_FROM_COURSE);) {
 	    statement.setInt(1, student.getId());
 	    statement.setInt(2, course.getId());

@@ -23,17 +23,17 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import ua.com.foxminded.schoolmaster.DatabaseConnector;
+import ua.com.foxminded.schoolmaster.ConnectionProvider;
 import ua.com.foxminded.schoolmaster.domain.Group;
 
 class GroupDAOTest {
 
-    DatabaseConnector databaseConnector;
+    ConnectionProvider databaseConnector;
     GroupDAO groupDAO;
     private IDatabaseTester databaseTester;
 
     public GroupDAOTest() throws IOException, SQLException {
-	this.databaseConnector = new DatabaseConnector("application.properties");
+	this.databaseConnector = new ConnectionProvider("application.properties");
 	this.groupDAO = new GroupDAO(databaseConnector);
     }
 
@@ -41,7 +41,7 @@ class GroupDAOTest {
     public static void createSchema() throws Exception {
 	URL url = Thread.currentThread().getContextClassLoader().getResource("schema.sql");
 	File file = new File(url.toURI());
-	DatabaseConnector DatabaseConnector = new DatabaseConnector("application.properties");
+	ConnectionProvider DatabaseConnector = new ConnectionProvider("application.properties");
 	RunScript.execute(DatabaseConnector.getConnection(), new FileReader(file));
     }
 

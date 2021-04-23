@@ -25,14 +25,14 @@ import ua.com.foxminded.schoolmaster.dao.StudentDAO;
 
 public class DatabasePopulatorTest {
 
-    DatabaseConnector databaseConnector;
+    ConnectionProvider databaseConnector;
     StudentDAO studentDAO;
     GroupDAO groupDAO;
     private IDatabaseTester databaseTester;
     private DatabasePopulator databasePopulator;
 
     public DatabasePopulatorTest() throws IOException {
-	databaseConnector = new DatabaseConnector("application.properties");
+	databaseConnector = new ConnectionProvider("application.properties");
 	DatabasePopulator databasePopulator = new DatabasePopulator(databaseConnector);
     }
 
@@ -40,7 +40,7 @@ public class DatabasePopulatorTest {
     public static void createTables() throws Exception {
 	URL url = Thread.currentThread().getContextClassLoader().getResource("schema.sql");
 	File file = new File(url.toURI());
-	DatabaseConnector databaseConnector = new DatabaseConnector("application.properties");
+	ConnectionProvider databaseConnector = new ConnectionProvider("application.properties");
 	RunScript.execute(databaseConnector.getConnection(), new FileReader(file));
     }
 

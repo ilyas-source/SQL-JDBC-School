@@ -21,17 +21,17 @@ public class Menu {
 	    + "6. Remove the student from one of his or her courses" + CR
 	    + "Enter choice or 0 to quit:";
 
-    DatabaseConnector databaseConnector;
+    ConnectionProvider connectionProvider;
     Scanner scanner;
     CourseDAO courseDAO;
     StudentDAO studentDAO;
     GroupDAO groupDAO;
 
-    public Menu(DatabaseConnector сonnection) {
-	this.databaseConnector = сonnection;
-	this.groupDAO = new GroupDAO(databaseConnector);
-	this.studentDAO = new StudentDAO(databaseConnector);
-	this.courseDAO = new CourseDAO(databaseConnector);
+    public Menu(ConnectionProvider сonnection) {
+	this.connectionProvider = сonnection;
+	this.groupDAO = new GroupDAO(connectionProvider);
+	this.studentDAO = new StudentDAO(connectionProvider);
+	this.courseDAO = new CourseDAO(connectionProvider);
 	scanner = new Scanner(System.in);
     }
 

@@ -12,8 +12,8 @@ import ua.com.foxminded.schoolmaster.domain.Student;
 public class Main {
 
     public static void main(String[] args) throws SQLException, IOException, URISyntaxException {
-	DatabaseConnector databaseConnector = new DatabaseConnector("application.properties");
-	DatabasePopulator databasePopulator = new DatabasePopulator(databaseConnector);
+	ConnectionProvider connectionProvider = new ConnectionProvider("application.properties");
+	DatabasePopulator databasePopulator = new DatabasePopulator(connectionProvider);
 
 	System.out.println("Creating tables...");
 	databasePopulator.executeSqlScript("schema.sql");
@@ -33,7 +33,7 @@ public class Main {
 	System.out.println("Assigning students to courses...");
 	databasePopulator.assignCourses(students, courses, 3);
 
-	Menu menu = new Menu(databaseConnector);
+	Menu menu = new Menu(connectionProvider);
 	menu.start();
     }
 }

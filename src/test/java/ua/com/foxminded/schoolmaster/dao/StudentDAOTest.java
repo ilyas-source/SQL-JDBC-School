@@ -24,18 +24,18 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import ua.com.foxminded.schoolmaster.DatabaseConnector;
+import ua.com.foxminded.schoolmaster.ConnectionProvider;
 import ua.com.foxminded.schoolmaster.domain.Course;
 import ua.com.foxminded.schoolmaster.domain.Student;
 
 class StudentDAOTest {
 
-    DatabaseConnector databaseConnector;
+    ConnectionProvider databaseConnector;
     StudentDAO studentDAO;
     private IDatabaseTester databaseTester;
 
     public StudentDAOTest() throws IOException {
-	databaseConnector = new DatabaseConnector("application.properties");
+	databaseConnector = new ConnectionProvider("application.properties");
 	studentDAO = new StudentDAO(databaseConnector);
     }
 
@@ -49,7 +49,7 @@ class StudentDAOTest {
     public static void createTables() throws Exception {
 	URL url = Thread.currentThread().getContextClassLoader().getResource("schema.sql");
 	File file = new File(url.toURI());
-	DatabaseConnector databaseConnector = new DatabaseConnector("application.properties");
+	ConnectionProvider databaseConnector = new ConnectionProvider("application.properties");
 	RunScript.execute(databaseConnector.getConnection(), new FileReader(file));
     }
 

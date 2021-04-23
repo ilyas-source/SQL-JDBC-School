@@ -1,7 +1,5 @@
 package ua.com.foxminded.schoolmaster.dao;
 
-import static ua.com.foxminded.schoolmaster.SqlQueries.*;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,6 +12,11 @@ import ua.com.foxminded.schoolmaster.DatabaseConnector;
 import ua.com.foxminded.schoolmaster.domain.Course;
 
 public class CourseDAO {
+
+    private static final String GET_COURSES = "SELECT course_id, course_name, course_description FROM courses ORDER BY course_id;";
+    private static final String GET_COURSES_BY_STUDENT_ID = "SELECT course_id, course_name, course_description FROM courses c where c.course_id in (SELECT course_id FROM students_courses sc WHERE student_id = ?);";
+    private static final String CREATE_COURSE = "INSERT into courses (course_name, course_description) VALUES (?, ?);";
+    private static final String GET_COURSE_BY_ID = "SELECT course_id, course_name, course_description FROM courses WHERE course_id = ?;";
 
     private DatabaseConnector databaseConnector;
 

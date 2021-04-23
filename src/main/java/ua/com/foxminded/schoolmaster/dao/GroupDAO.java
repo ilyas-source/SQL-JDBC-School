@@ -1,7 +1,5 @@
 package ua.com.foxminded.schoolmaster.dao;
 
-import static ua.com.foxminded.schoolmaster.SqlQueries.*;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -11,10 +9,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ua.com.foxminded.schoolmaster.DatabaseConnector;
-import ua.com.foxminded.schoolmaster.domain.Course;
 import ua.com.foxminded.schoolmaster.domain.Group;
 
 public class GroupDAO {
+
+    private static final String GET_GROUPS = "SELECT group_id, group_name FROM groups ORDER BY group_id;";
+    private static final String CREATE_GROUP = "INSERT into groups (group_name) VALUES (?);";
+    private static final String GROUPS_LESS_THAN = "SELECT g.group_id, g.group_name FROM groups g inner join"
+	    + " students s on g.group_id = s.group_id group by g.group_id, g.group_name HAVING count(*) <= ? ORDER BY g.group_id";
 
     private DatabaseConnector databaseConnector;
 

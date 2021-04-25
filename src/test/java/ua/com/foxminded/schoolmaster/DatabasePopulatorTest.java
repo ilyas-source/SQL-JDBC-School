@@ -1,70 +1,101 @@
 package ua.com.foxminded.schoolmaster;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import org.dbunit.IDatabaseTester;
-import org.dbunit.JdbcDatabaseTester;
-import org.dbunit.dataset.IDataSet;
-import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
-import org.dbunit.operation.DatabaseOperation;
-import org.h2.tools.RunScript;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import ua.com.foxminded.schoolmaster.dao.CourseDAO;
 import ua.com.foxminded.schoolmaster.dao.GroupDAO;
 import ua.com.foxminded.schoolmaster.dao.StudentDAO;
+import ua.com.foxminded.schoolmaster.domain.Course;
+import ua.com.foxminded.schoolmaster.domain.Group;
+import ua.com.foxminded.schoolmaster.domain.Student;
 
-public class DatabasePopulatorTest {
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-    ConnectionProvider databaseConnector;
-    StudentDAO studentDAO;
+import static java.util.stream.Collectors.counting;
+import static java.util.stream.Collectors.groupingBy;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+@ExtendWith(MockitoExtension.class)
+class DatabasePopulatorTest {
+
+    @Mock
+    ConnectionProvider connectionProvider;
+
+    @Mock
     GroupDAO groupDAO;
-    private IDatabaseTester databaseTester;
-    private DatabasePopulator databasePopulator;
 
-    public DatabasePopulatorTest() throws IOException {
-	databaseConnector = new ConnectionProvider("application.properties");
-	DatabasePopulator databasePopulator = new DatabasePopulator(databaseConnector);
-    }
+    @Mock
+    CourseDAO courseDAO;
 
-    @BeforeAll
-    public static void createTables() throws Exception {
-	URL url = Thread.currentThread().getContextClassLoader().getResource("schema.sql");
-	File file = new File(url.toURI());
-	ConnectionProvider databaseConnector = new ConnectionProvider("application.properties");
-	RunScript.execute(databaseConnector.getConnection(), new FileReader(file));
-    }
+    @Mock
+    StudentDAO studentDAO;
 
-    @BeforeEach
-    void fillTables() throws Exception {
-	String jdbcUrl = databaseConnector.getConnection().getMetaData().getURL();
-	databaseTester = new JdbcDatabaseTester(org.h2.Driver.class.getName(), jdbcUrl);
-	databaseTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
-	databaseTester.setDataSet(readDataSet());
-	databaseTester.onSetup();
+    @InjectMocks
+    DatabasePopulator databasePopulator;
+
+    public DatabasePopulatorTest() {
+	databasePopulator = new DatabasePopulator(connectionProvider);
     }
 
     @Test
-    void givenScriptFileName_onExecuteSqlScript_thenGet5Groups() throws SQLException, URISyntaxException {
-	databasePopulator.executeSqlScript("script.sql");
+    void givenFileName_onFillTableCourses_thenGet3Courses() throws SQLException, IOException, URISyntaxException {
+	List<Course> expected = new ArrayList<>();
+	expected.add(new Course("Math", "Learn math"));
+	expected.add(new Course("History", "Know the past"));
+	expected.add(new Course("Arts", "Understand visuals"));
 
-	int actual = groupDAO.getAll().size();
+	List<Course> actual = databasePopulator.fillTableCourses("courses.txt");
 
-	assertEquals(5, actual);
+	assertEquals(expected, actual);
     }
 
-    private IDataSet readDataSet() throws Exception {
-	ClassLoader classLoader = getClass().getClassLoader();
-	String file = classLoader.getResource("testdata.xml").getFile();
-	return new FlatXmlDataSetBuilder().build(new FileInputStream(file));
+    @Test
+    void givenQuantity_onCreateRandomGroups_thenGet3Groups() throws SQLException {
+
+	int actual = databasePopulator.createRandomGroups(3).size();
+
+	assertEquals(3, actual);
+    }
+
+    @Test
+    void givenQuantity_onCreateRandomStudents_thenGet3Students() throws IOException, URISyntaxException {
+
+	int actual = databasePopulator.generateRandomStudents(3).size();
+
+	assertEquals(3, actual);
+    }
+
+    @Test
+    void givenStudentsAndGroups_onAssignGroups_thenGroupsHaveCorrectSize() throws SQLException, IOException, URISyntaxException {
+	List<Student> students2 = databasePopulator.generateRandomStudents(200);
+	List<Group> groups2 = databasePopulator.createRandomGroups(10);
+
+	AtomicInteger artificialID = new AtomicInteger();
+
+	artificialID.set(0);
+	students2.forEach(student -> student.setId(artificialID.incrementAndGet()));
+
+	artificialID.set(0);
+	groups2.forEach(group -> group.setId(artificialID.incrementAndGet()));
+
+	databasePopulator.assignGroups(students2, groups2);
+
+	Map<Integer, Long> groupsSize = students2.stream()
+		.collect(groupingBy(Student::getGroupId, counting()));
+
+	groupsSize.forEach((k, v) -> assertTrue((v >= 10) && (v < 30)));
     }
 }

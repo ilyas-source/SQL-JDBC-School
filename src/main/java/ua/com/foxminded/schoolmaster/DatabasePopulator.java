@@ -3,6 +3,7 @@ package ua.com.foxminded.schoolmaster;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.function.Supplier;
 import static java.util.stream.Collectors.*;
 import java.util.stream.Stream;
@@ -72,33 +74,25 @@ public class DatabasePopulator {
 	return courses;
     }
 
-    public List<Student> generateRandomStudents(int quantity) throws SQLException {
-
-	Supplier<Student> randomStudent = () -> {
-	    try {
-		return new Student(
-			getRandomStringFromFile("firstnames.txt"),
-			getRandomStringFromFile("lastnames.txt"));
-	    } catch (IOException | URISyntaxException e) {
-		e.printStackTrace();
-	    }
-	    return new Student();
-	};
-	List<Student> students = Stream.generate(randomStudent)
+    public List<Student> generateRandomStudents(int quantity) throws IOException, URISyntaxException {
+	List<String> firstNames = getStreamFromFile("firstnames.txt");
+	List<String> lastNames = getStreamFromFile("firstnames.txt");
+	Supplier<Student> randomStudent = () -> new Student(getRandomString(firstNames), getRandomString(lastNames));
+	return Stream.generate(randomStudent)
 		.limit(quantity)
+		.peek(student -> {
+		    try {
+			studentDAO.create(student);
+		    } catch (SQLException e) {
+			e.printStackTrace();
+		    }
+		})
 		.collect(toList());
-	for (Student student : students) {
-	    studentDAO.create(student);
-	}
-	return students;
     }
 
     public void assignGroups(List<Student> students, List<Group> groups) throws SQLException {
-	for (Student student : students) {
-	    student.setGroupId(groups.get(getRandomNumber(0, groups.size() - 1)).getId());
-	}
-
 	Map<Integer, Long> groupsSize = students.stream()
+		.peek(student -> student.setGroupId(groups.get(getRandomNumber(0, groups.size() - 1)).getId()))
 		.collect(groupingBy(Student::getGroupId, counting()));
 
 	for (Student student : students) {
@@ -129,5 +123,16 @@ public class DatabasePopulator {
 	URL url = Thread.currentThread().getContextClassLoader().getResource(fileName);
 	Path path = Paths.get(url.toURI());
 	return fileReader.readFile(path);
+    }
+
+    private List<String> getStreamFromFile(String fileName) throws IOException, URISyntaxException {
+	URL url = Thread.currentThread().getContextClassLoader().getResource(fileName);
+	Path path = Paths.get(url.toURI());
+	return Files.lines(path).collect(toList());
+    }
+
+    private String getRandomString(List<String> strings) {
+	Random rand = new Random();
+	return strings.get(rand.nextInt(strings.size()));
     }
 }

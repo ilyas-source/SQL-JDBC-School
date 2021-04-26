@@ -87,9 +87,17 @@ class DatabasePopulatorTest {
     @Test
     void givenQuantity_onCreateRandomStudents_thenGet3Students() throws IOException, URISyntaxException {
 
-	int actual = databasePopulator.generateRandomStudents(3).size();
+	List<Student> actual = databasePopulator.generateRandomStudents(3);
 
-	assertEquals(3, actual);
+	assertEquals(3, actual.size());
+    }
+
+    @Test
+    void givenQuantity_onCreateRandomStudents_thenMockCalled3Times() throws IOException, URISyntaxException, SQLException {
+
+	databasePopulator.generateRandomStudents(3);
+
+	verify(studentDAO, times(3)).create(any());
     }
 
     @Test

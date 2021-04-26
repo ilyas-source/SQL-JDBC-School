@@ -18,6 +18,8 @@ import java.util.function.Supplier;
 import static java.util.stream.Collectors.*;
 import java.util.stream.Stream;
 
+import javax.swing.ListModel;
+
 import ua.com.foxminded.schoolmaster.dao.CourseDAO;
 import ua.com.foxminded.schoolmaster.dao.GroupDAO;
 import ua.com.foxminded.schoolmaster.dao.StudentDAO;
@@ -110,11 +112,30 @@ public class DatabasePopulator {
     public void assignCourses(List<Student> students, List<Course> courses, int quantity)
 	    throws SQLException {
 	for (Student student : students) {
-	    Collections.shuffle(courses);
-	    for (Course course : courses.subList(0, getRandomNumber(1, quantity))) {
+	    for (Course course : selectRandomCourses(courses, getRandomNumber(1, quantity))) {
 		studentDAO.addToCourse(student, course);
 	    }
 	}
+    }
+
+    private List<Course> selectRandomCourses(List<Course> courses, int quantity) {
+	Random random = new Random();
+	if (quantity >= courses.size()) {
+	    return courses;
+	}
+
+	List<Course> selectedCourses = new ArrayList<>();
+	int listSize = courses.size();
+
+	while (selectedCourses.size() < quantity) {
+	    int randomIndex = random.nextInt(listSize);
+	    Course course = courses.get(randomIndex);
+
+	    if (!selectedCourses.contains(course)) {
+		selectedCourses.add(course);
+	    }
+	}
+	return selectedCourses;
     }
 
     private int getRandomNumber(int min, int max) {

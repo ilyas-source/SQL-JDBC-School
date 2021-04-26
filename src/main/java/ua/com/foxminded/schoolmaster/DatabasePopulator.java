@@ -30,6 +30,8 @@ import static ua.com.foxminded.schoolmaster.NamingGenerator.*;
 public class DatabasePopulator {
 
     private static final String CR = System.lineSeparator();
+    private static final int MINIMUM_STUDENTS = 10;
+    private static final int MAXIMUM_STUDENTS = 30;
     private ConnectionProvider connectionProvider;
     private FileReader fileReader;
     CourseDAO courseDAO;
@@ -58,7 +60,7 @@ public class DatabasePopulator {
 	for (int i = 0; i < quantity; i++) {
 	    Group group = new Group(generateGroupName());
 	    groups.add(group);
-	    this.groupDAO.create(group);
+	    groupDAO.create(group);
 	}
 	return groups;
     }
@@ -75,8 +77,8 @@ public class DatabasePopulator {
     }
 
     public List<Student> generateRandomStudents(int quantity) throws IOException, URISyntaxException {
-	List<String> firstNames = getStreamFromFile("firstnames.txt");
-	List<String> lastNames = getStreamFromFile("firstnames.txt");
+	List<String> firstNames = getStringsFromFile("firstnames.txt");
+	List<String> lastNames = getStringsFromFile("firstnames.txt");
 	Supplier<Student> randomStudent = () -> new Student(getRandomString(firstNames), getRandomString(lastNames));
 	return Stream.generate(randomStudent)
 		.limit(quantity)
@@ -97,7 +99,7 @@ public class DatabasePopulator {
 
 	for (Student student : students) {
 	    Long studentsInGroup = groupsSize.get(student.getGroupId());
-	    if (studentsInGroup >= 10 && studentsInGroup <= 30) {
+	    if (studentsInGroup >= MINIMUM_STUDENTS && studentsInGroup <= MAXIMUM_STUDENTS) {
 		studentDAO.update(student);
 	    } else {
 		student.setGroupId(null);
@@ -125,7 +127,7 @@ public class DatabasePopulator {
 	return fileReader.readFile(path);
     }
 
-    private List<String> getStreamFromFile(String fileName) throws IOException, URISyntaxException {
+    private List<String> getStringsFromFile(String fileName) throws IOException, URISyntaxException {
 	URL url = Thread.currentThread().getContextClassLoader().getResource(fileName);
 	Path path = Paths.get(url.toURI());
 	return Files.lines(path).collect(toList());

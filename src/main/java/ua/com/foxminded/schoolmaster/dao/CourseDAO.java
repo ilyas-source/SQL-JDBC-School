@@ -13,15 +13,15 @@ import ua.com.foxminded.schoolmaster.domain.Course;
 
 public class CourseDAO {
 
-    private static final String GET_COURSES = "SELECT course_id, course_name, course_description FROM courses ORDER BY course_id;";
-    private static final String GET_COURSES_BY_STUDENT_ID = "SELECT course_id, course_name, course_description FROM courses c where c.course_id in (SELECT course_id FROM students_courses sc WHERE student_id = ?);";
-    private static final String CREATE_COURSE = "INSERT into courses (course_name, course_description) VALUES (?, ?);";
-    private static final String GET_COURSE_BY_ID = "SELECT course_id, course_name, course_description FROM courses WHERE course_id = ?;";
+    private static final String GET_COURSES = "SELECT course_id, course_name, course_description FROM courses ORDER BY course_id";
+    private static final String GET_COURSES_BY_STUDENT_ID = "SELECT course_id, course_name, course_description FROM courses c where c.course_id in (SELECT course_id FROM students_courses sc WHERE student_id = ?)";
+    private static final String CREATE_COURSE = "INSERT into courses (course_name, course_description) VALUES (?, ?)";
+    private static final String GET_COURSE_BY_ID = "SELECT course_id, course_name, course_description FROM courses WHERE course_id = ?";
 
     private ConnectionProvider connectionProvider;
 
-    public CourseDAO(ConnectionProvider databaseConnection) {
-	connectionProvider = databaseConnection;
+    public CourseDAO(ConnectionProvider connectionProvider) {
+	this.connectionProvider = connectionProvider;
     }
 
     public void create(Course course) throws SQLException {

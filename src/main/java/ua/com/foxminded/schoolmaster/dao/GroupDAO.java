@@ -13,15 +13,15 @@ import ua.com.foxminded.schoolmaster.domain.Group;
 
 public class GroupDAO {
 
-    private static final String GET_GROUPS = "SELECT group_id, group_name FROM groups ORDER BY group_id;";
-    private static final String CREATE_GROUP = "INSERT into groups (group_name) VALUES (?);";
+    private static final String GET_GROUPS = "SELECT group_id, group_name FROM groups ORDER BY group_id";
+    private static final String CREATE_GROUP = "INSERT into groups (group_name) VALUES (?)";
     private static final String GROUPS_LESS_THAN = "SELECT g.group_id, g.group_name FROM groups g inner join"
 	    + " students s on g.group_id = s.group_id group by g.group_id, g.group_name HAVING count(*) <= ? ORDER BY g.group_id";
 
     private ConnectionProvider connectionProvider;
 
-    public GroupDAO(ConnectionProvider databaseConnection) {
-	connectionProvider = databaseConnection;
+    public GroupDAO(ConnectionProvider connectionProvider) {
+	this.connectionProvider = connectionProvider;
     }
 
     public void create(Group group) throws SQLException {
@@ -45,7 +45,7 @@ public class GroupDAO {
 	    statement.setInt(1, studentCount);
 	    try (ResultSet resultSet = statement.executeQuery();) {
 		while (resultSet.next()) {
-		    groups.add(extractGroupFromResultSet(resultSet));
+		    groups.add(mapToGroup(resultSet));
 		}
 	    }
 	}
@@ -58,14 +58,14 @@ public class GroupDAO {
 		PreparedStatement statement = connection.prepareStatement(GET_GROUPS)) {
 	    try (ResultSet resultSet = statement.executeQuery();) {
 		while (resultSet.next()) {
-		    groups.add(extractGroupFromResultSet(resultSet));
+		    groups.add(mapToGroup(resultSet));
 		}
 	    }
 	}
 	return groups;
     }
 
-    private Group extractGroupFromResultSet(ResultSet resultSet) throws SQLException {
+    private Group mapToGroup(ResultSet resultSet) throws SQLException {
 	return new Group(resultSet.getInt("group_id"), resultSet.getString("group_name"));
     }
 }

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -27,9 +26,15 @@ import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.any;
 
 @ExtendWith(MockitoExtension.class)
 class DatabasePopulatorTest {
+
+    private static final int MINIMUM_STUDENTS = 10;
+    private static final int MAXIMUM_STUDENTS = 30;
 
     @Mock
     ConnectionProvider connectionProvider;
@@ -65,9 +70,18 @@ class DatabasePopulatorTest {
     @Test
     void givenQuantity_onCreateRandomGroups_thenGet3Groups() throws SQLException {
 
-	int actual = databasePopulator.createRandomGroups(3).size();
+	List<Group> actual = databasePopulator.createRandomGroups(3);
 
-	assertEquals(3, actual);
+	verify(groupDAO, times(3)).create(any());
+	assertEquals(3, actual.size());
+    }
+
+    @Test
+    void givenQuantity_onCreateRandomGroups_thenMockCalled3Times() throws SQLException {
+
+	databasePopulator.createRandomGroups(3);
+
+	verify(groupDAO, times(3)).create(any());
     }
 
     @Test
@@ -96,6 +110,6 @@ class DatabasePopulatorTest {
 	Map<Integer, Long> groupsSize = students2.stream()
 		.collect(groupingBy(Student::getGroupId, counting()));
 
-	groupsSize.forEach((k, v) -> assertTrue((v >= 10) && (v < 30)));
+	groupsSize.forEach((k, v) -> assertTrue((v >= MINIMUM_STUDENTS) && (v < MAXIMUM_STUDENTS)));
     }
 }

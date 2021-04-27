@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -28,7 +30,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.ArgumentMatchers.any;
 
 @ExtendWith(MockitoExtension.class)
 class DatabasePopulatorTest {
@@ -44,6 +45,12 @@ class DatabasePopulatorTest {
 
     @Mock
     StudentDAO studentDAO;
+
+    @Captor
+    ArgumentCaptor<Group> groupCaptor;
+
+    @Captor
+    ArgumentCaptor<Student> studentCaptor;
 
     @InjectMocks
     DatabasePopulator databasePopulator;
@@ -69,8 +76,10 @@ class DatabasePopulatorTest {
 
 	List<Group> actual = databasePopulator.createRandomGroups(3);
 
-	verify(groupDAO, times(3)).create(any());
-	assertEquals(3, actual.size());
+	verify(groupDAO, times(3)).create(groupCaptor.capture());
+	List<Group> expected = groupCaptor.getAllValues();
+
+	assertEquals(expected, actual);
     }
 
     @Test
@@ -78,8 +87,10 @@ class DatabasePopulatorTest {
 
 	List<Student> actual = databasePopulator.generateRandomStudents(3);
 
-	verify(studentDAO, times(3)).create(any());
-	assertEquals(3, actual.size());
+	verify(studentDAO, times(3)).create(studentCaptor.capture());
+	List<Student> expected = studentCaptor.getAllValues();
+
+	assertEquals(expected, actual);
     }
 
     @Test

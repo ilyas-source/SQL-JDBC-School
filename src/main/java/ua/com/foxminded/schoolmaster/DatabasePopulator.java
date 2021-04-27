@@ -32,13 +32,12 @@ import static ua.com.foxminded.schoolmaster.NamingGenerator.*;
 public class DatabasePopulator {
 
     private static final String CR = System.lineSeparator();
-    private static final int MINIMUM_STUDENTS = 10;
-    private static final int MAXIMUM_STUDENTS = 30;
+
     private ConnectionProvider connectionProvider;
     private FileReader fileReader;
-    CourseDAO courseDAO;
-    StudentDAO studentDAO;
-    GroupDAO groupDAO;
+    private CourseDAO courseDAO;
+    private StudentDAO studentDAO;
+    private GroupDAO groupDAO;
 
     public DatabasePopulator(ConnectionProvider connectionProvider) {
 	this.connectionProvider = connectionProvider;
@@ -94,14 +93,14 @@ public class DatabasePopulator {
 		.collect(toList());
     }
 
-    public void assignGroups(List<Student> students, List<Group> groups) throws SQLException {
+    public void assignGroups(List<Student> students, List<Group> groups, int minStudents, int maxStudents) throws SQLException {
 	Map<Integer, Long> groupsSize = students.stream()
 		.peek(student -> student.setGroupId(groups.get(getRandomNumber(0, groups.size() - 1)).getId()))
 		.collect(groupingBy(Student::getGroupId, counting()));
 
 	for (Student student : students) {
 	    Long studentsInGroup = groupsSize.get(student.getGroupId());
-	    if (studentsInGroup >= MINIMUM_STUDENTS && studentsInGroup <= MAXIMUM_STUDENTS) {
+	    if (studentsInGroup >= minStudents && studentsInGroup <= maxStudents) {
 		studentDAO.update(student);
 	    } else {
 		student.setGroupId(null);
@@ -125,10 +124,9 @@ public class DatabasePopulator {
 	}
 
 	List<Course> selectedCourses = new ArrayList<>();
-	int listSize = courses.size();
 
 	while (selectedCourses.size() < quantity) {
-	    int randomIndex = random.nextInt(listSize);
+	    int randomIndex = random.nextInt(courses.size());
 	    Course course = courses.get(randomIndex);
 
 	    if (!selectedCourses.contains(course)) {

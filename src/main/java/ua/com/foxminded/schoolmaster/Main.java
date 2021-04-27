@@ -28,7 +28,7 @@ public class Main {
 	List<Student> students = databasePopulator.generateRandomStudents(200);
 
 	System.out.println("Assigning students to groups...");
-	databasePopulator.assignGroups(students, groups);
+	databasePopulator.assignGroups(students, groups, 10, 30);
 
 	System.out.println("Assigning students to courses...");
 	databasePopulator.assignCourses(students, courses, 3);

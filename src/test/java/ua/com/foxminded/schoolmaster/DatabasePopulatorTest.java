@@ -33,9 +33,6 @@ import static org.mockito.ArgumentMatchers.any;
 @ExtendWith(MockitoExtension.class)
 class DatabasePopulatorTest {
 
-    private static final int MINIMUM_STUDENTS = 10;
-    private static final int MAXIMUM_STUDENTS = 30;
-
     @Mock
     ConnectionProvider connectionProvider;
 
@@ -77,27 +74,12 @@ class DatabasePopulatorTest {
     }
 
     @Test
-    void givenQuantity_onCreateRandomGroups_thenMockCalled3Times() throws SQLException {
-
-	databasePopulator.createRandomGroups(3);
-
-	verify(groupDAO, times(3)).create(any());
-    }
-
-    @Test
-    void givenQuantity_onCreateRandomStudents_thenGet3Students() throws IOException, URISyntaxException {
+    void givenQuantity_onCreateRandomStudents_thenGet3Students() throws IOException, URISyntaxException, SQLException {
 
 	List<Student> actual = databasePopulator.generateRandomStudents(3);
 
-	assertEquals(3, actual.size());
-    }
-
-    @Test
-    void givenQuantity_onCreateRandomStudents_thenMockCalled3Times() throws IOException, URISyntaxException, SQLException {
-
-	databasePopulator.generateRandomStudents(3);
-
 	verify(studentDAO, times(3)).create(any());
+	assertEquals(3, actual.size());
     }
 
     @Test
@@ -113,11 +95,11 @@ class DatabasePopulatorTest {
 	artificialID.set(0);
 	groups2.forEach(group -> group.setId(artificialID.incrementAndGet()));
 
-	databasePopulator.assignGroups(students2, groups2);
+	databasePopulator.assignGroups(students2, groups2, 10, 30);
 
 	Map<Integer, Long> groupsSize = students2.stream()
 		.collect(groupingBy(Student::getGroupId, counting()));
 
-	groupsSize.forEach((k, v) -> assertTrue((v >= MINIMUM_STUDENTS) && (v < MAXIMUM_STUDENTS)));
+	groupsSize.forEach((k, v) -> assertTrue((v >= 10) && (v <= 30)));
     }
 }
